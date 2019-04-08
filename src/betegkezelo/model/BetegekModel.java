@@ -12,7 +12,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement(name="Betegek")
 @XmlAccessorType(XmlAccessType.FIELD)
-
 public class BetegekModel implements Serializable {
 	private int taj;
 	private String nev;

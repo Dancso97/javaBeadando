@@ -23,8 +23,10 @@ import javax.swing.border.LineBorder;
 
 import betegkezelo.model.BetegekModel;
 import betegkezelo.model.FileManager;
+import betegkezelo.model.Kereses;
 import betegkezelo.model.Utils;
 import betegkezelo.view.BetegFelvetel;
+import betegkezelo.view.BetegekKereses;
 import betegkezelo.view.BetegekLista;
 import betegkezelo.view.BetegekListaLayout;
 import betegkezelo.view.BetegekModositas;
@@ -37,6 +39,7 @@ public class MainWindow extends JFrame {
 	private JTextField AdatKiirTextField;
 	private JTextField fdb;
 	private BetegekListaLayout ListaLayout;
+	private BetegekListaLayout ListaLayoutK;
 	private Object mezonevek[] = { "Pipa", "Taj", "Név", "Szülidõ", "Utolsó vizsgálat", "Betegségek" };
 	private String elemek[] = { "Válasszon!", "MySQL DB", "Helyi .xml fájl", "Helyi .csv fájl", "Helyi .json fájl" };
 	private String elemek2[] = { "Válasszon!", ">>> Forrás", "Helyi .xml fájl", "Helyi .csv fájl", "Helyi .json fájl",
@@ -46,9 +49,10 @@ public class MainWindow extends JFrame {
 	private File fbe;
 	private int lastTajNumber = 0;
 	private String kerkif = "kod";
+	private JTextField kulcs;
 
 	// Main window
-	public MainWindow() {
+	public MainWindow() {	
 		setTitle("Betegkezel\u0151");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 741, 297);
@@ -306,17 +310,101 @@ public class MainWindow extends JFrame {
 
 		JLabel ListaLabel = new JLabel("Adatok sz\u00E1ma:");
 		ListaLabel.setFont(new Font("Times New Roman", Font.BOLD, 14));
-		ListaLabel.setBounds(183, 56, 123, 14);
+		ListaLabel.setBounds(143, 56, 123, 14);
 		mainContentPane.add(ListaLabel);
 
 		fdb = new JTextField();
 		fdb.setText("0");
 		fdb.setHorizontalAlignment(SwingConstants.RIGHT);
 		fdb.setEditable(false);
-		fdb.setBounds(280, 54, 50, 20);
+		fdb.setBounds(245, 54, 50, 20);
 		mainContentPane.add(fdb);
 		fdb.setColumns(10);
+		
+		JPanel panel = new JPanel();
+		panel.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panel.setBounds(308, 53, 407, 147);
+		mainContentPane.add(panel);
+		panel.setLayout(null);
+		
+		JRadioButton jrbTaj = new JRadioButton("Taj");
+		jrbTaj.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (jrbTaj.isSelected()) kerkif="taj";
+			}
+		});
+		jrbTaj.setBounds(6, 7, 109, 23);
+		panel.add(jrbTaj);
+		
+		JRadioButton jrbNev = new JRadioButton("N\u00E9v");
+		jrbNev.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (jrbNev.isSelected()) kerkif="nev";
+			}
+		});
+		jrbNev.setBounds(6, 29, 109, 23);
+		panel.add(jrbNev);
+		
+		JRadioButton jrbSzul = new JRadioButton("Sz\u00FClet\u00E9si id\u0151");
+		jrbSzul.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (jrbSzul.isSelected()) kerkif="szul";
+			}
+		});
+		jrbSzul.setBounds(6, 58, 109, 23);
+		panel.add(jrbSzul);
+		
+		JRadioButton jrbUvizsga = new JRadioButton("Utols\u00F3 vizsg\u00E1lat:");
+		jrbUvizsga.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (jrbUvizsga.isSelected()) kerkif="uvizsga";
+			}
+		});
+		jrbUvizsga.setBounds(6, 87, 109, 23);
+		panel.add(jrbUvizsga);
+		
+		JRadioButton jrbBeteg = new JRadioButton("Betegs\u00E9g");
+		jrbBeteg.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (jrbBeteg.isSelected()) kerkif="beteg";
+			}
+		});
+		jrbBeteg.setBounds(6, 117, 109, 23);
+		panel.add(jrbBeteg);
+		
+		JLabel lblKeress = new JLabel("Keres\u00E9s:");
+		lblKeress.setBounds(153, 91, 46, 14);
+		mainContentPane.add(lblKeress);
+		
+		JButton btnKeres = new JButton("Keres\u00E9s");
+		btnKeres.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (Utils.RF(fdb).equals("0")) Utils.showMD("Nincs betöltött adat!", 0);
+				else if (!Utils.filled(kulcs)) Utils.showMD("A keresõkulcs (X=) nincs megadva!", 0);
+				else if (!Kereses.KeyCheck(kerkif, Utils.RF(kulcs))) Utils.showMD("A keresõkulcs hibásan van megadva!", 0);
+				else {
+				ListaLayoutK = Kereses.Select(ListaLayout, kerkif, Utils.RF(kulcs), mezonevek);
+				BetegekKereses ek = new BetegekKereses(MainWindow.this, ListaLayoutK, kerkif,
+				Utils.RF(kulcs), mezonevek);
+				ek.setVisible(true);
+				}
 
+			}
+		});
+		btnKeres.setBounds(177, 183, 89, 23);
+		mainContentPane.add(btnKeres);
+		
+		kulcs = new JTextField();
+		kulcs.setBounds(143, 156, 123, 20);
+		mainContentPane.add(kulcs);
+		kulcs.setColumns(10);
+		
+		ButtonGroup bg = new ButtonGroup();
+		bg.add(jrbTaj);
+		bg.add(jrbNev);
+		bg.add(jrbSzul);
+		bg.add(jrbUvizsga);
+		bg.add(jrbBeteg);
 	}
 
 	public int getLastTajNumber() {

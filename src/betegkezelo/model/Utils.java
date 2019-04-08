@@ -95,6 +95,8 @@ public class Utils {
 			return false;
 		}
 	}
-	
+	public static String RF(JTextField a) {
+		return a.getText().toString();
+	}
 
 }
